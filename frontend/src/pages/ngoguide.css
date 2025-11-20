@@ -1,0 +1,37 @@
+.guidelines-center {
+  text-align: center;
+  padding: 30px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.guidelines-center h2 {
+  font-size: 32px;
+  margin-bottom: 25px;
+  font-weight: 600;
+}
+
+/* Container stays centered */
+.guidelines-list {
+  display: inline-block; 
+  text-align: left;      /* Align numbers + text properly */
+}
+
+/* Align numbers in a perfect vertical column */
+.guidelines-list div {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.num {
+  width: 30px;                 /* FIXED WIDTH → All numbers line up */
+  text-align: right;
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.guidelines-list span {
+  font-size: 20px;
+  line-height: 1.5;
+}

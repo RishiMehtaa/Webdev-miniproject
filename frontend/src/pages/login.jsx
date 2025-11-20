@@ -5,30 +5,43 @@ import "./login.css";
 export default function Login() {
   const [form, setForm] = useState({ username: "", password: "", role: "" });
   const navigate = useNavigate();
+
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
+
   function handleSubmit(e) {
     e.preventDefault();
+
     if (!form.username || !form.password || !form.role) {
       alert("Please fill all fields");
       return;
     }
+
     const stored = JSON.parse(
-      localStorage.getItem(form.role === "volunteer" ? "volunteers" : "ngos") || "[]"
+      localStorage.getItem(form.role === "volunteer" ? "volunteers" : "ngos") ||
+        "[]"
     );
+
     const found = stored.find(
       (u) => u.username === form.username && u.password === form.password
     );
+
     if (!found) {
       alert("Invalid credentials");
       return;
     }
+
     localStorage.setItem(
       "currentUser",
       JSON.stringify({ username: found.username, role: form.role })
     );
-    navigate("/userprofile");
+
+    if (form.role === "volunteer") {
+      navigate("/userprofile");
+    } else {
+      navigate("/ngoprofile"); 
+    }
   }
 
   return (
@@ -39,6 +52,7 @@ export default function Login() {
         <form onSubmit={handleSubmit}>
           <label>Username</label>
           <input name="username" value={form.username} onChange={handleChange} />
+
           <label>Password</label>
           <input
             name="password"
@@ -46,13 +60,16 @@ export default function Login() {
             value={form.password}
             onChange={handleChange}
           />
+
           <label>Role</label>
           <select name="role" value={form.role} onChange={handleChange}>
             <option value="">Select</option>
             <option value="volunteer">Volunteer</option>
             <option value="ngo">NGO</option>
           </select>
+
           <button className="login-btn">Login</button>
+
           <div className="signup-links">
             <p>Don't have an account?</p>
             <span onClick={() => (window.location = "/signupvolunteer")}>

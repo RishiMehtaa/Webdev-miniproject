@@ -33,13 +33,12 @@ function UserProfile() {
   }
 
   const user = {
-    fullname: foundUser.fullname,
     username: foundUser.username,
     email: foundUser.email,
     image: foundUser.image || "/images/user.png"
   };
 
-  const events = JSON.parse(localStorage.getItem("registeredEvents") || "[]");
+  const events = JSON.parse(localStorage.getItem("addedEvents") || "[]");
 
   return (
     <>
@@ -48,17 +47,16 @@ function UserProfile() {
         <div className="top-section">
           <img src={user.image} className="profile-pic" />
           <div className="user-details">
-            <p><strong>Name:</strong> {user.fullname}</p>
             <p><strong>Username:</strong> {user.username}</p>
             <p><strong>Email:</strong> {user.email}</p>
           </div>
         </div>
 
-        <h3 className="events-heading">Registered Events</h3>
+        <h3 className="events-heading">Added Events</h3>
 
         <div className="events-section">
           {events.length === 0 ? (
-            <p className="no-events">No events registered yet.</p>
+            <p className="no-events">No events added yet.</p>
           ) : (
             events.map(event => (
               <div key={event.id} className="event-card">
