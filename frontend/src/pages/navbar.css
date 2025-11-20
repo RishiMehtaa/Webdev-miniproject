@@ -1,0 +1,52 @@
+.navbar {
+  width: auto;
+  background-color: black;
+  padding: 5px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+}
+
+
+.logo-img {
+  height: 65px;
+  width: auto;
+  cursor: pointer;
+}
+
+.nav-links {
+  display: flex;
+  gap: 25px;
+  list-style: none;
+  font-size: 16px;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+}
+
+.nav-links li {
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.nav-links li:hover {
+  color: #cfcfcf;
+}
+
+.join-btn {
+  background-color: red;
+  border: none;
+  padding: 8px 18px;
+  color: white;
+  font-size: 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.join-btn:hover {
+  background-color: rgb(200, 0, 0);
+}

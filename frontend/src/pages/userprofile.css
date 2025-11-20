@@ -1,0 +1,65 @@
+.profile-container {
+  padding: 20px;
+  background: black;
+  min-height: 100vh;
+}
+
+.top-section {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+  background: black;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.1);
+}
+
+.profile-pic {
+  width: 200px;
+  height: 200px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.user-details p {
+  margin: 6px 0;
+  gap: 0 px 10 px;
+  font-size: 20px;
+}
+
+.events-heading {
+  margin-top: 40px;
+  margin-bottom: 15px;
+  font-size: 30px;
+}
+
+.events-section {
+  background: black;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.1);
+}
+
+.event-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #ffe5e5;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border-left: 5px solid #ff4d4d;
+}
+
+.event-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.event-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+}
