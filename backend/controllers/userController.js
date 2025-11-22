@@ -1,99 +1,63 @@
-const { connectDB, ObjectId } = require("../database");
-const { sendMail } = require("../utils/mailer");
-const crypto = require("crypto");
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+const User = require('../models/User');
+const { sendMail } = require('../utils/mailer');
 
-// Hash password
-function hashPassword(password) {
-  return crypto.createHash("sha256").update(password).digest("hex");
-}
+const JWT_SECRET = process.env.JWT_SECRET || 'devsecret';
 
-// Create user (signup)
 async function createUser(req, res) {
-  const db = await connectDB();
-  const usersCollection = db.collection("users");
-
-  let body = "";
-  req.on("data", chunk => body += chunk);
-  req.on("end", async () => {
-    try {
-      const data = JSON.parse(body);
-      const existing = await usersCollection.findOne({ email: data.email });
-      if (existing) {
-        res.writeHead(400, { "Content-Type": "application/json" });
-        return res.end(JSON.stringify({ message: "Email already registered" }));
-      }
-
-      const user = {
-        name: data.name,
-        email: data.email,
-        password: hashPassword(data.password),
-        role: data.role, // 'ngo' or 'volunteer'
-        joinedEvents: [],
-        createdAt: new Date()
-      };
-
-      const result = await usersCollection.insertOne(user);
-
-      res.writeHead(201, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ message: "User created", userId: result.insertedId }));
-    } catch (err) {
-      res.writeHead(500, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ message: "Server error", error: err.message }));
-    }
-  });
-}
-
-// Login user
-async function loginUser(req, res) {
-  const db = await connectDB();
-  const usersCollection = db.collection("users");
-
-  let body = "";
-  req.on("data", chunk => body += chunk);
-  req.on("end", async () => {
-    try {
-      const data = JSON.parse(body);
-      const user = await usersCollection.findOne({ email: data.email });
-
-      if (!user || user.password !== hashPassword(data.password)) {
-        res.writeHead(401, { "Content-Type": "application/json" });
-        return res.end(JSON.stringify({ message: "Invalid credentials" }));
-      }
-
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ message: "Login successful", userId: user._id, role: user.role }));
-    } catch (err) {
-      res.writeHead(500, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ message: "Server error", error: err.message }));
-    }
-  });
-}
-
-// Get user profile
-async function getProfile(req, res) {
-  const db = await connectDB();
-  const usersCollection = db.collection("users");
-
-  const queryParams = new URL(req.url, `http://${req.headers.host}`).searchParams;
-  const userId = queryParams.get("userId");
-
-  if (!userId) {
-    res.writeHead(400, { "Content-Type": "application/json" });
-    return res.end(JSON.stringify({ message: "userId required" }));
-  }
-
   try {
-    const user = await usersCollection.findOne({ _id: new ObjectId(userId) }, { projection: { password: 0 } });
-    if (!user) {
-      res.writeHead(404, { "Content-Type": "application/json" });
-      return res.end(JSON.stringify({ message: "User not found" }));
+    const data = req.body;
+    if (!data.name || !data.email || !data.password) return res.status(400).json({ message: 'name, email and password required' });
+
+    const existing = await User.findOne({ email: data.email });
+    if (existing) return res.status(400).json({ message: 'Email already registered' });
+
+    const hashed = await bcrypt.hash(data.password, 10);
+    const user = new User({ name: data.name, email: data.email, password: hashed, role: data.role || 'volunteer' });
+    await user.save();
+
+   
+    if (user.email) {
+      sendMail(user.email, 'Welcome', `Welcome ${user.name}!`).catch(() => {});
     }
 
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(user));
+    return res.status(201).json({ message: 'User created', userId: user._id });
   } catch (err) {
-    res.writeHead(500, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ message: "Server error", error: err.message }));
+    return res.status(500).json({ message: 'Server error', error: err.message });
+  }
+}
+
+async function loginUser(req, res) {
+  try {
+    const data = req.body;
+    if (!data.email || !data.password) return res.status(400).json({ message: 'email and password required' });
+
+    const user = await User.findOne({ email: data.email });
+    if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+
+    const ok = await bcrypt.compare(data.password, user.password);
+    if (!ok) return res.status(401).json({ message: 'Invalid credentials' });
+
+    const token = jwt.sign({ userId: user._id.toString(), role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    return res.status(200).json({ message: 'Login successful', userId: user._id, role: user.role, token });
+  } catch (err) {
+    return res.status(500).json({ message: 'Server error', error: err.message });
+  }
+}
+
+async function getProfile(req, res) {
+  try {
+    const userId = req.query.userId;
+    if (!userId) return res.status(400).json({ message: 'userId required' });
+
+    const user = await User.findById(userId).select('-password');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    return res.status(200).json(user);
+  } catch (err) {
+    return res.status(500).json({ message: 'Server error', error: err.message });
   }
 }
 
